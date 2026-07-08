@@ -10,7 +10,7 @@ import logging
 
 from processor.import_processor.config import ImportConfig, get_config
 from processor.import_processor.exceptions import ImportProcessError
-from utils.task_util import add_running_task, add_done_task
+# from utils.task_util import add_running_task, add_done_task
 
 T = TypeVar("T")  # 泛型状态类型
 
@@ -65,13 +65,13 @@ class BaseNode(ABC):
         """
         try:
             # 1. 开始准备执行节点
-            self.logger.info(f"--- {self.name} 开始 ---")
+            # self.logger.info(f"--- {self.name} 开始 ---")
 
             # 2. 执行节点
             result = self.process(state)
 
             # 3. 执行节点成功
-            self.logger.info(f"--- {self.name} 完成 ---")
+            # self.logger.info(f"--- {self.name} 完成 ---")
 
             return result
         except Exception as e:

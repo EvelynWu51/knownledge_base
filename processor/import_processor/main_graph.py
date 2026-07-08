@@ -1,8 +1,9 @@
 import logging
 
-from langgraph.constants import END
+from langgraph.constants import END, START
 from langgraph.graph import StateGraph
 
+from processor.import_processor.base import setup_logging
 from processor.import_processor.nodes.a_node_entry import NodeEntry
 from processor.import_processor.nodes.b_node_pdf_to_md import NodePDFToMD
 from processor.import_processor.nodes.c_node_md_img import NodeMDImg
@@ -11,9 +12,6 @@ from processor.import_processor.nodes.e_node_item_name_recognition import NodeIt
 from processor.import_processor.nodes.f_node_bge_embedding import NodeBGEEmbedding
 from processor.import_processor.nodes.g_node_import_milvus import NodeImportMilvus
 from processor.import_processor.state import ImportGraphState
-
-
-
 
 class KBImportWorkflow:
 
@@ -39,6 +37,7 @@ class KBImportWorkflow:
         elif state.get("is_md_read_enabled"):
             return "node_md_img"
         else:
+            logging.info("route after entry:未导入指定类型文件")
             return END
 
     @property
@@ -66,12 +65,28 @@ class KBImportWorkflow:
                 END:END
             }
         )
+        builder.add_edge(START,"node_entry")
         builder.add_edge("node_pdf_to_md","node_md_img")
         builder.add_edge("node_md_img","node_document_split")
         builder.add_edge("node_document_split", "node_item_name_recognition")
         builder.add_edge("node_item_name_recognition", "node_bge_embedding")
         builder.add_edge("node_bge_embedding", "node_import_milvus")
 
-
         graph = builder.compile()
         return graph
+
+    def run(self, state: ImportGraphState, stream: bool = False):
+
+        if stream:
+            return self.graph.stream(state, stream_mode="values")
+        else:
+            return self.graph.invoke(state)
+
+
+if __name__ == "__main__":
+    setup_logging()
+    workflow = KBImportWorkflow()
+    init_state = {"import_file_path":r"C:\Users\Public\Nwt\cache\recv\徐老师\掌柜智库课件0525\掌柜智库课件0525\2.资料\04-设备手册汇总\doc\Aolynk CB304n Cable网桥 用户手册-5W100-整本手册.pdf"}
+    for event in workflow.run(init_state, stream=True):
+        print(f"state:{event}")
+

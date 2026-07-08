@@ -8,7 +8,7 @@
 
 """
 
-from typing import TypedDict, List
+from typing import TypedDict, List, Optional
 
 import copy
 
@@ -40,7 +40,7 @@ class ImportGraphState(TypedDict, total=False):
 
     import_file_path: str  # 导入文件路径
 
-    file_dir: str  # 导入(出)文件目录
+    file_dir: Optional[str]   # 导入(出)文件目录
 
     pdf_path: str  # PDF 文件路径
 
